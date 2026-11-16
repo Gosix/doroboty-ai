@@ -1,9 +1,14 @@
 import { useState, type ChangeEvent } from "react";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { usePrototype } from "./store";
 import { serializeState, MAX_IMPORT_BYTES } from "./storage";
 import { PageTitle } from "./shell";
+
+const posthogConfigured = Boolean(
+  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+);
 
 export function downloadText(name: string, text: string, type = "application/json") {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -40,8 +45,10 @@ export function SettingsPage() {
   function confirm() {
     if (pending === "reset") {
       reset();
+      if (posthogConfigured) posthog.capture("scenario_reset");
       setMessage("Przywrócono scenariusz początkowy.");
     } else if (importState(raw)) {
+      if (posthogConfigured) posthog.capture("scenario_imported");
       setMessage("Dane zostały zaimportowane.");
     }
     setPending(null);
@@ -58,7 +65,10 @@ export function SettingsPage() {
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
-            onClick={() => downloadText("doroboty-scenariusz.json", serializeState(state))}
+            onClick={() => {
+              downloadText("doroboty-scenariusz.json", serializeState(state));
+              if (posthogConfigured) posthog.capture("scenario_exported");
+            }}
           >
             Eksportuj dane
           </Button>
@@ -125,7 +135,8 @@ export function PrivacyPage() {
         </p>
         <p>
           Profile, aplikacje i ustawienia pozostają w pamięci tej przeglądarki. Aplikacja nie wysyła
-          ich do bazy, dostawcy AI ani systemu analitycznego. Plik eksportu zawiera cały lokalny
+          ich do bazy ani dostawcy AI. Analityka otrzymuje wyłącznie metadane o działaniach, nigdy
+          treść profili, aplikacji, notatek ani plików eksportu. Plik eksportu zawiera cały lokalny
           scenariusz, w tym notatki.
         </p>
         <p>

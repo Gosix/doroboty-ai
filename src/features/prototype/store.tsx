@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import posthog from "posthog-js";
 import { initialState, transition, type Action, type State } from "./model";
 import { parseState, readState, saveState, type StoragePort } from "./storage";
+
+const posthogConfigured = Boolean(
+  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+);
 function browserStorage(): StoragePort | null {
   try {
     return window.localStorage;
@@ -15,6 +20,18 @@ function useStore() {
   const [error, setError] = useState("");
   const [blocked, setBlocked] = useState(loaded.blocked);
   const latest = useRef(state);
+  const identifiedPersonId = useRef<string | null>(null);
+
+  function resetIdentityBeforePersonChange(next: State) {
+    if (
+      posthogConfigured &&
+      latest.current.activePersonId !== null &&
+      latest.current.activePersonId !== next.activePersonId
+    ) {
+      posthog.reset();
+    }
+  }
+
   function commit(next: State, replace = false) {
     latest.current = next;
     setState(next);
@@ -30,7 +47,15 @@ function useStore() {
   }
   function run(action: Action) {
     try {
-      commit(transition(latest.current, action));
+      const next = transition(latest.current, action);
+      resetIdentityBeforePersonChange(next);
+      commit(next);
+      if (posthogConfigured && action.type === "toggle_saved") {
+        const saved = next.saved.some(
+          (item) => item.candidateId === next.activePersonId && item.jobId === action.jobId,
+        );
+        posthog.capture("job_bookmark_toggled", { saved });
+      }
       return true;
     } catch (e) {
       setError(
@@ -44,6 +69,7 @@ function useStore() {
   function importState(raw: string) {
     try {
       const next = parseState(raw);
+      resetIdentityBeforePersonChange(next);
       commit(next, true);
       return true;
     } catch (e) {
@@ -54,6 +80,18 @@ function useStore() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
   }, []);
+
+  useEffect(() => {
+    const person = latest.current.people.find((item) => item.id === state.activePersonId);
+    if (!person) {
+      identifiedPersonId.current = null;
+      return;
+    }
+    if (!posthogConfigured || identifiedPersonId.current === person.id) return;
+
+    posthog.identify(person.id, { name: person.name, role: person.role });
+    identifiedPersonId.current = person.id;
+  }, [state.activePersonId]);
   return {
     state,
     issue,
@@ -63,7 +101,11 @@ function useStore() {
     run,
     importState,
     clearError: () => setError(""),
-    reset: () => commit(initialState(), true),
+    reset: () => {
+      const next = initialState();
+      resetIdentityBeforePersonChange(next);
+      commit(next, true);
+    },
   };
 }
 type Store = ReturnType<typeof useStore>;
