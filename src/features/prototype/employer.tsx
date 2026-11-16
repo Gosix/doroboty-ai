@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import posthog from "posthog-js";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,10 @@ import { currentPerson, jobSchema } from "./model";
 import { usePrototype } from "./store";
 import { Field } from "./workspace";
 import { Empty, NotFound, PageTitle } from "./shell";
+
+const posthogConfigured = Boolean(
+  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+);
 
 export function EmployerJobs() {
   const { state } = usePrototype();
@@ -133,7 +138,23 @@ export function EmployerJobEditor() {
       );
       return;
     }
-    if (run({ type: "publish", job: parsed.data })) navigate("/app/oferty");
+    if (run({ type: "publish", job: parsed.data })) {
+      if (posthogConfigured) {
+        posthog.capture("job_published", {
+          is_new_job: !existing,
+          job_category: parsed.data.category,
+          job_function: parsed.data.function,
+          remote_status: parsed.data.remoteStatus,
+        });
+        posthog.logger.info("job publication completed", {
+          is_new_job: !existing,
+          job_category: parsed.data.category,
+          job_function: parsed.data.function,
+          remote_status: parsed.data.remoteStatus,
+        });
+      }
+      navigate("/app/oferty");
+    }
   }
   return (
     <>
@@ -171,6 +192,7 @@ export function EmployerJobEditor() {
                 `${title}\n\nO roli\n${source.trim().slice(0, 10000)}\n\nJak pracujemy\nŁączymy potrzeby użytkowników, odpowiedzialne wykorzystanie AI i mierzalne efekty.\n\nProces rekrutacji\nPrześlij aplikację i opowiedz o projekcie, w którym Twoje decyzje wpłynęły na wynik.`,
               );
               setApproved(false);
+              if (posthogConfigured) posthog.capture("job_description_generated");
             }}
           >
             Przygotuj opis z AI
@@ -286,8 +308,10 @@ export function CompanyEditor() {
         name: String(data.get("name")),
         description: String(data.get("description")),
       })
-    )
+    ) {
+      if (posthogConfigured) posthog.capture("company_profile_updated");
       setMessage("Dane firmy zostały zapisane.");
+    }
   }
   return (
     <>
