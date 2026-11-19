@@ -8,4 +8,6 @@ artifacts/
 *.tsbuildinfo
 .env*
 !.env.posthog.example
+!.env.example
 npm-debug.log*
+.env

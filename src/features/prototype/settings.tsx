@@ -125,14 +125,15 @@ export function PrivacyPage() {
         </p>
         <p>
           Profile, aplikacje i ustawienia pozostają w pamięci tej przeglądarki. Aplikacja nie wysyła
-          ich do bazy, dostawcy AI ani systemu analitycznego. Plik eksportu zawiera cały lokalny
-          scenariusz, w tym notatki.
+          ich do własnej bazy ani dostawcy AI. Plik eksportu zawiera cały lokalny scenariusz, w tym
+          notatki.
         </p>
         <p>
-          Właściciel tej wersji testowej może osobno włączyć pomiar odwiedzin w PostHog EU. Pomiar
-          obejmuje nazwy widoków i tymczasowe identyfikatory techniczne, bez treści formularzy,
-          profili, CV i notatek. Nie nagrywa sesji ani nie identyfikuje wybranej postaci. Domyślnie
-          oraz na localhost pomiar jest wyłączony.
+          Gdy skonfigurowano PostHog EU, aplikacja wysyła zdarzenia techniczne i produktowe oraz
+          może rejestrować interakcje i sesje zgodnie z ustawieniami projektu. Wybrana postać jest
+          identyfikowana przez techniczny identyfikator, a jej nazwa i rola są właściwościami osoby.
+          Właściwości niestandardowych zdarzeń i logów nie zawierają treści formularzy, profili, CV
+          ani notatek.
         </p>
         <p>
           Możesz usunąć zmiany przyciskiem „Resetuj scenariusz” w ustawieniach lub wyczyścić dane
