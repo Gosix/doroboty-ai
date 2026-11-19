@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { initialState, transition, type Action, type State } from "./model";
+import { initialState, transition, currentPerson, type Action, type State } from "./model";
 import { parseState, readState, saveState, type StoragePort } from "./storage";
+import { isPostHogInitialized, posthog } from "@/app/analytics";
 function browserStorage(): StoragePort | null {
   try {
     return window.localStorage;
@@ -15,6 +16,10 @@ function useStore() {
   const [error, setError] = useState("");
   const [blocked, setBlocked] = useState(loaded.blocked);
   const latest = useRef(state);
+  const identifiedPerson = useRef<{ id: string; name: string; role: string } | null | undefined>(
+    undefined,
+  );
+  const person = currentPerson(state);
   function commit(next: State, replace = false) {
     latest.current = next;
     setState(next);
@@ -54,6 +59,26 @@ function useStore() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
   }, []);
+  useEffect(() => {
+    if (!isPostHogInitialized) return;
+
+    if (!person) {
+      if (identifiedPerson.current) posthog.reset();
+      identifiedPerson.current = null;
+      return;
+    }
+
+    const nextIdentity = { id: person.id, name: person.name, role: person.role };
+    if (
+      identifiedPerson.current?.id === nextIdentity.id &&
+      identifiedPerson.current.name === nextIdentity.name &&
+      identifiedPerson.current.role === nextIdentity.role
+    )
+      return;
+    if (identifiedPerson.current && identifiedPerson.current.id !== person.id) posthog.reset();
+    posthog.identify(person.id, { name: person.name, role: person.role });
+    identifiedPerson.current = nextIdentity;
+  }, [person]);
   return {
     state,
     issue,
