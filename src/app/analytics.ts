@@ -67,7 +67,7 @@ export function sanitizePageview(event: CaptureResult | null): CaptureResult | n
   const unknown = event.properties.route === "/unknown";
   if (!page && !unknown) return null;
   const route = page?.[1] || "/unknown";
-  // Only generated SDK IDs and fixed route metadata survive this boundary.
+  // Preserve the SDK public ingestion token as well as generated IDs and fixed routes.
   const properties: CaptureResult["properties"] = {
     app: "doroboty-ai-case",
     page_name: page?.[0] || "not_found",
@@ -79,7 +79,14 @@ export function sanitizePageview(event: CaptureResult | null): CaptureResult | n
     $geoip_disable: true,
     $lib: "web",
   };
-  for (const key of ["distinct_id", "$device_id", "$session_id", "$window_id", "$lib_version"]) {
+  for (const key of [
+    "token",
+    "distinct_id",
+    "$device_id",
+    "$session_id",
+    "$window_id",
+    "$lib_version",
+  ]) {
     if (typeof event.properties[key] === "string") properties[key] = event.properties[key];
   }
   return { uuid: event.uuid, event: "$pageview", timestamp: event.timestamp, properties };

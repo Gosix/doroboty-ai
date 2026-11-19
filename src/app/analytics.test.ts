@@ -92,6 +92,7 @@ describe("optional PostHog EU analytics", () => {
       $set_once: { notes: "Private application text" },
       properties: {
         route: "/oferty/:slug",
+        token: "phc_fake_test_project_not_a_real_token",
         distinct_id: "sdk-generated-id",
         $session_id: "sdk-session-id",
         $current_url: "https://example.invalid/?email=private@example.invalid",
@@ -104,6 +105,7 @@ describe("optional PostHog EU analytics", () => {
     expect(result?.properties.$current_url).toBe(
       "https://dorobotyproject.netlify.app/#/oferty/:slug",
     );
+    expect(result?.properties.token).toBe("phc_fake_test_project_not_a_real_token");
     expect(result?.properties.distinct_id).toBe("sdk-generated-id");
     expect(JSON.stringify(result)).not.toMatch(/private@example|secret|Private application/);
     expect(result?.properties.$process_person_profile).toBe(false);
