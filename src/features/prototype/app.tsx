@@ -17,6 +17,7 @@ import {
 import { EmployerJobs, EmployerJobEditor, CompanyEditor } from "./employer";
 import { SettingsPage, PrivacyPage } from "./settings";
 import { CasePage } from "./case";
+import { AnalyticsPageviews } from "@/app/analytics-pageviews";
 function AppRoutes() {
   return (
     <Routes>
@@ -151,6 +152,7 @@ export function App() {
   return (
     <PrototypeProvider>
       <HashRouter>
+        <AnalyticsPageviews />
         <AppRoutes />
       </HashRouter>
     </PrototypeProvider>

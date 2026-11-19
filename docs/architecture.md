@@ -23,3 +23,7 @@ The baseline historical CSV and JSON are separate from interactive state. Future
 ## Checks
 
 npm run check and ./scripts/verify run formatting, design-system reference integrity/example checks, lint, types, unit tests, build and Playwright against the static preview. Playwright checks external requests, complete workflows, error/recovery behavior, keyboard controls and mobile layout. No test starts system services. npm run dev only starts Vite.
+
+## Optional test-site analytics
+
+AnalyticsPageviews inside HashRouter reports pathname changes to the lazy PostHog EU client only when the explicit build flag, public token and approved hostname match. The send boundary keeps fixed route templates and generated temporary IDs; it drops free text, raw slugs/IDs, queries and referrers. Replay, autocapture, profiles and persistent tracking storage are disabled. The default local workflow has no analytics requests. Local scenario state never enters this path. See POSTHOG.md for configuration and deployment checks.

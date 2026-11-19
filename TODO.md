@@ -17,3 +17,9 @@ BRIEF.md describes the current scope. Historical milestones remain in Git histor
 ## Deliberate limitations
 
 - Human research, course release approval and publishing a participant URL remain separate activities; passing code checks does not establish these outcomes.
+
+## Optional owner test-fork analytics
+
+- [x] Prepare default-off, EU-only page-view tracking for the explicitly approved Netlify hostname, without scenario data or persistent tracking storage.
+- [ ] Configure the public project token and build flags in the owner’s test deployment after review.
+- [ ] Verify actual receipt and payload in the owner’s PostHog EU project after publishing the reviewed code.

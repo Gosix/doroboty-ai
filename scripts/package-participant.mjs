@@ -41,6 +41,7 @@ const entries = [
   "FEATURES.md",
   "TODO.md",
   "README.md",
+  ".env.posthog.example",
   "scripts/bootstrap",
   "scripts/verify",
   "scripts/package-participant.mjs",
@@ -49,6 +50,7 @@ const entries = [
   "docs/design-system",
   "docs/PARTICIPANT_GUIDE.md",
   "docs/SECURITY.md",
+  "docs/POSTHOG.md",
   "docs/case",
 ];
 fs.mkdirSync(target, { recursive: true });

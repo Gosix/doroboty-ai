@@ -129,6 +129,12 @@ export function PrivacyPage() {
           scenariusz, w tym notatki.
         </p>
         <p>
+          Właściciel tej wersji testowej może osobno włączyć pomiar odwiedzin w PostHog EU. Pomiar
+          obejmuje nazwy widoków i tymczasowe identyfikatory techniczne, bez treści formularzy,
+          profili, CV i notatek. Nie nagrywa sesji ani nie identyfikuje wybranej postaci. Domyślnie
+          oraz na localhost pomiar jest wyłączony.
+        </p>
+        <p>
           Możesz usunąć zmiany przyciskiem „Resetuj scenariusz” w ustawieniach lub wyczyścić dane
           witryny w przeglądarce. Hosting może prowadzić własne logi dostępu.
         </p>
